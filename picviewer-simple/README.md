@@ -35,7 +35,7 @@
 * **Persistent UI:** Controls stay on top (z-index managed), so they remain clickable even when the image is zoomed or rotated.
 
 
-* **Shortcuts:**
+## Shortcuts
 * `Esc`: Close viewer
 * `+` / `-`: Zoom in/out
 * `[` / `]`: Rotate left/right
@@ -44,7 +44,6 @@
 * `Alt (hold) + hover`: Open viewer
 * `Double click`: Open viewer
 
----
 
 ## Customization
 
