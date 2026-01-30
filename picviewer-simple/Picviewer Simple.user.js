@@ -7,7 +7,9 @@
 // @namespace https://greasyfork.org/users/1238578
 // @license      GPL-2.0
 // @match        *://*/*
-// @grant        none
+// @grant        GM_registerMenuCommand
+// @grant        GM_setValue
+// @grant        GM_getValue
 // @run-at       document-end
 // @icon        https://i.ibb.co.com/CKS9K5v2/picviewer-simple.png
 // @downloadURL https://update.greasyfork.org/scripts/559994/Picviewer%20Simple.user.js
@@ -17,11 +19,19 @@
 (function () {
   'use strict';
 
-  // ---------- Config ----------
+  // ---------- Config & Settings ----------
+  let ENABLE_HOVER_ICON = GM_getValue('enable_hover_icon', true);
+
   const ICON_SIZE = 22;    // px
   const ICON_RAISE_PX = 8; //
   const RIGHT_OFFSET = 8;  //
   const GLOBAL_Z = 2147483647;
+
+  // Register Menu Command
+  GM_registerMenuCommand(ENABLE_HOVER_ICON ? "❌ Hide Hover Icon" : "✅ Show Hover Icon", () => {
+    GM_setValue('enable_hover_icon', !ENABLE_HOVER_ICON);
+    location.reload();
+  });
 
   // Viewer config
   const ZOOM_STEP = 0.12;
@@ -253,7 +263,7 @@
   }
 
   function addIcon(img) {
-    if (!img || icons.has(img)) return;
+    if (!ENABLE_HOVER_ICON || !img || icons.has(img)) return;
     // create icon
     const icon = document.createElement('div');
     icon.className = 'pv-mini-icon';
