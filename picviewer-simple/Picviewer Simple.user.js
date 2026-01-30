@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Picviewer Simple
-// @version      1.1
+// @version      1.5
 // @description  Simple image viewer — hover icon or double click opens a minimal zoom+rotate viewer.
 // @author       almahmud
 // @homepageURL    https://thealmahmud.blogspot.com/
@@ -118,6 +118,7 @@
 
   // Viewer state & helpers
   let scale = 1, rotation = 0, viewerOpen = false;
+  let hoveredImg = null;
   function applyTransform() { vimg.style.transform = `rotate(${rotation}deg) scale(${scale})`; }
   function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
   function openViewer(src) {
@@ -166,6 +167,38 @@
     else if (e.key === '0') { e.preventDefault(); scale = 1; rotation = 0; applyTransform(); }
   });
 
+  // Shortcut: Double Alt to open viewer
+  let lastAltTime = 0;
+  window.addEventListener('keydown', (e) => {
+    if (viewerOpen || e.key !== 'Alt') return;
+
+    // Prevent default Alt behavior (like opening browser menu) if hovering an image,
+    // ensuring the second press is captured reliably.
+    if (hoveredImg) e.preventDefault();
+
+    const now = Date.now();
+    if (now - lastAltTime < 600) {
+      if (hoveredImg) {
+        const src = hoveredImg.currentSrc || hoveredImg.src || hoveredImg.getAttribute('data-src') || hoveredImg.getAttribute('data-original');
+        if (src) {
+          openViewer(src);
+          lastAltTime = 0;
+          return;
+        }
+      }
+    }
+    lastAltTime = now;
+  });
+
+  // Global tracking fallback for hovered image
+  document.addEventListener('mouseover', (e) => {
+    const im = e.target && (e.target.tagName === 'IMG' ? e.target : (e.target.closest && e.target.closest('img')));
+    if (im) hoveredImg = im;
+  }, { passive: true });
+  document.addEventListener('mouseout', (e) => {
+    if (hoveredImg && e.target === hoveredImg) hoveredImg = null;
+  }, { passive: true });
+
   // ---------- Small magnifier icon per-image ----------
   const icons = new WeakMap(); // img -> { icon, handlers }
 
@@ -203,9 +236,18 @@
     const rect = img.getBoundingClientRect();
     if (rect.width === 0 || rect.height === 0) { icon.style.display = 'none'; return; }
     icon.style.display = '';
-    const inset = 6;
-    const top = Math.max(0, rect.top + window.scrollY + inset - ICON_RAISE_PX);
-    const left = Math.max(0, rect.left + window.scrollX + rect.width - ICON_SIZE - inset + RIGHT_OFFSET);
+
+    let top, left;
+    // For small images (<100px), place icon outside at top-right corner
+    if (rect.width < 100 || rect.height < 100) {
+      top = rect.top + window.scrollY - ICON_SIZE - 2;
+      left = rect.left + window.scrollX + rect.width - ICON_SIZE;
+    } else {
+      const inset = 6;
+      top = Math.max(0, rect.top + window.scrollY + inset - ICON_RAISE_PX);
+      left = Math.max(0, rect.left + window.scrollX + rect.width - ICON_SIZE - inset + RIGHT_OFFSET);
+    }
+
     icon.style.top = top + 'px';
     icon.style.left = left + 'px';
   }
@@ -221,8 +263,8 @@
     icon.style.height = ICON_SIZE + 'px';
     document.body.appendChild(icon);
 
-    const show = () => { positionIconFor(img, icon); icon.classList.add('show'); };
-    const hide = () => { icon.classList.remove('show'); };
+    const show = () => { positionIconFor(img, icon); icon.classList.add('show'); hoveredImg = img; };
+    const hide = () => { icon.classList.remove('show'); if (hoveredImg === img) hoveredImg = null; };
 
     img.addEventListener('mouseenter', show, { passive: true });
     img.addEventListener('mouseleave', hide, { passive: true });
@@ -255,7 +297,7 @@
       ent.icon.removeEventListener('mouseleave', ent.hide);
       ent.icon.removeEventListener('click', ent.onClick);
       if (ent.icon.parentNode) ent.icon.parentNode.removeChild(ent.icon);
-    } catch (err) {}
+    } catch (err) { }
     icons.delete(img);
   }
 

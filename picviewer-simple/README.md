@@ -23,19 +23,26 @@
 ## Features
 
 * **Hover-Triggered Icon:** A magnifier icon appears on every `<img>` element (no site-specific hacks needed).
-* **Flexible Activation:** Open the viewer by clicking the icon or double-clicking the image.
+* **Flexible Activation:** Open the viewer by:
+    * Clicking the magnifier icon.
+    * Double-clicking the image.
+    * **Double Alt Key Shortcut:** Hover over an image and press the `Alt` key twice in quick succession.
+    * **Alt + Hover:** Holding the `Alt` key while moving the mouse over images will also trigger the viewer instantly.
+* **Intelligent Positioning:** Automatically positions the icon outside the image bounds for small images (<100px) to ensure visibility and prevent obstruction.
 * **Comprehensive Controls:**
 * **Zoom:** via buttons or mouse wheel.
 * **Rotate:** Left or right using dedicated buttons.
 * **Persistent UI:** Controls stay on top (z-index managed), so they remain clickable even when the image is zoomed or rotated.
 
 
-* **Keyboard Shortcuts:**
+* **Shortcuts:**
 * `Esc`: Close viewer
 * `+` / `-`: Zoom in/out
 * `[` / `]`: Rotate left/right
 * `0`: Reset view
-
+* `Alt + Alt + hover`: Open viewer
+* `Alt (hold) + hover`: Open viewer
+* `Double click`: Open viewer
 
 ---
 
